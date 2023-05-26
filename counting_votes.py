@@ -86,4 +86,26 @@ def count_votes(dict_files):
 single_dict = convert_csv_files_to_dicts_list(file_names)
 
 votes_result = count_votes(single_dict)
+
 # Generate output CSV files legislators-support-oppose-count.csv and bills.csv
+
+
+def out_put_dict_to_csv(dict_to_save, file_name):
+
+    list_to_save = list(dict_to_save.values())
+    header = list_to_save[0].keys()
+
+    with open(f'{file_name}.csv', 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=header)
+        writer.writeheader()
+        writer.writerows(list_to_save)
+
+
+legislators_votes = votes_result['legislators']
+
+bills_voted = votes_result['bills']
+
+
+out_put_dict_to_csv(legislators_votes, 'legislators-2')
+
+out_put_dict_to_csv(bills_voted, 'bills_2')
