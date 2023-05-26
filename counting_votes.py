@@ -92,7 +92,15 @@ votes_result = count_votes(single_dict)
 
 def out_put_dict_to_csv(dict_to_save, file_name):
 
+    if (not isinstance(dict_to_save, dict) or not isinstance(file_name, str)):
+        raise TypeError('Arguments must be a dictionary and a string types')
+
     list_to_save = list(dict_to_save.values())
+
+    if (len(list_to_save) == 0 or file_name == ''):
+        print("Please enter with a valid dict and string file name.")
+        return
+
     header = list_to_save[0].keys()
 
     with open(f'{file_name}.csv', 'w', newline='') as csvfile:
@@ -106,6 +114,6 @@ legislators_votes = votes_result['legislators']
 bills_voted = votes_result['bills']
 
 
-out_put_dict_to_csv(legislators_votes, 'legislators-2')
+out_put_dict_to_csv(legislators_votes, 'legislators-support-oppose-count')
 
-out_put_dict_to_csv(bills_voted, 'bills_2')
+out_put_dict_to_csv(bills_voted, 'bills')
