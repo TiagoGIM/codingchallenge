@@ -64,21 +64,21 @@ def count_votes(dict_files):
     bills = generate_bills_with_count(
         legislators, dict_files['bills'])
 
-    voted_bill = map_vote_id_to_bill_id(dict_files['votes'])
+    mapped_bill_vote = map_vote_id_to_bill_id(dict_files['votes'])
 
     for vote in dict_files['vote_results']:
         legislator_id = int(vote['legislator_id'])
         vote_id = int(vote['vote_id'])
         vote_type = int(vote['vote_type'])
 
+        bill_id = mapped_bill_vote[vote_id]
+
         if vote_type == 1:
-            bills[voted_bill[vote_id]]['supporter_count'] = bills[voted_bill[vote_id]
-                                                                  ]['supporter_count'] + 1
+            bills[bill_id]['supporter_count'] = bills[bill_id]['supporter_count'] + 1
             legislators[legislator_id]['num_supported_bills'] = legislators[legislator_id]['num_supported_bills'] + 1
         elif vote_type == 2:
             legislators[legislator_id]['num_opposed_bills'] = legislators[legislator_id]['num_opposed_bills'] + 1
-            bills[voted_bill[vote_id]]['opposer_count'] = bills[voted_bill[vote_id]
-                                                                ]['opposer_count'] + 1
+            bills[bill_id]['opposer_count'] = bills[bill_id]['opposer_count'] + 1
 
     return {'legislators': legislators, 'bills': bills}
 
