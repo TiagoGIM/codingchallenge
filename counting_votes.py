@@ -83,13 +83,6 @@ def count_votes(dict_files):
     return {'legislators': legislators, 'bills': bills}
 
 
-single_dict = convert_csv_files_to_dicts_list(file_names)
-
-votes_result = count_votes(single_dict)
-
-# Generate output CSV files legislators-support-oppose-count.csv and bills.csv
-
-
 def out_put_dict_to_csv(dict_to_save, file_name):
 
     if (not isinstance(dict_to_save, dict) or not isinstance(file_name, str)):
@@ -108,6 +101,12 @@ def out_put_dict_to_csv(dict_to_save, file_name):
         writer.writeheader()
         writer.writerows(list_to_save)
 
+
+single_dict = convert_csv_files_to_dicts_list(file_names)
+
+votes_result = count_votes(single_dict)
+
+# Generate output CSV files legislators-support-oppose-count.csv and bills.csv
 
 legislators_votes = votes_result['legislators']
 
