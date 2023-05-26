@@ -24,7 +24,6 @@ def process_data():
     with open('bills.csv', 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            print(row)
             bill_id = int(row['id'])
             bill_title = row['title']
             primary_id = int(row['sponsor_id'])
@@ -68,7 +67,7 @@ def process_data():
                 legislators[legislator_id]['num_opposed_bills'] = legislators[legislator_id]['num_opposed_bills'] + 1
                 bills[voted_bill[vote_id]]['opposer_count'] = bills[voted_bill[vote_id]
                                                                     ]['opposer_count'] + 1
-    print(legislators, bills)
+    return {'legislators': legislators, 'bills': bills}
 
 
 # Run the data processing
