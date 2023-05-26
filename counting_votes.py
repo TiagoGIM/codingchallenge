@@ -1,77 +1,89 @@
 import csv
 
 
-def process_data():
+file_names = ["bills", "legislators", "vote_results", "votes"]
+
+
+def convert_csv_files_to_dicts_list(files):
+    data = {}
+    for file in files:
+        with open(file+'.csv', 'r') as f:
+            data[file] = list(csv.DictReader(f))
+    return data
+
+
+def generate_legislator_with_count(dict_legislators):
     legislators = {}
+    for legislator in dict_legislators:
+
+        legislator_id = int(legislator['id'])
+        legislators[legislator_id] = {
+            'id': legislator_id,
+            'name': legislator['name'],
+            'num_supported_bills': 0,
+            'num_opposed_bills': 0,
+
+        }
+
+    return legislators
+
+
+def generate_bills_with_count(legislators_mapped, dic_bills):
     bills = {}
-    voted_bill = {}
-    vote_results = {}
+    for bil in dic_bills:
+        bill_id = int(bil['id'])
+        bill_title = bil['title']
+        primary_id = int(bil['sponsor_id'])
+        primary_sponsor = 'Unknown'
+        if primary_id in legislators_mapped:
+            primary_sponsor = legislators_mapped[primary_id]['name']
+        bills[bill_id] = {
+            'id': int(bil['id']),
+            'title': bill_title,
+            'primary_sponsor': primary_sponsor,
+            'supporter_count': 0,
+            'opposer_count': 0
+        }
+    return bills
 
-# Reading files and populating dicts.
-    with open('legislators.csv', 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            legislator_id = int(row['id'])
-            legislator_name = row['name']
-            legislators[legislator_id] = {
-                'id': legislator_id,
-                'name': legislator_name,
-                'num_supported_bills': 0,
-                'num_opposed_bills': 0
 
-            }
+def map_vote_id_to_bill_id(votes_dic):
+    bills_id = {}
+    for row in votes_dic:
+        vote_id = int(row['id'])
+        bill_id = int(row['bill_id'])
+        bills_id[vote_id] = bill_id
+    return bills_id
 
-    with open('bills.csv', 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            bill_id = int(row['id'])
-            bill_title = row['title']
-            primary_id = int(row['sponsor_id'])
-            primary_sponsor = 'Unknown'
-            if primary_id in legislators:
-                primary_sponsor = legislators[legislator_id]['name']
 
-            bills[bill_id] = {
-                'id': int(row['id']),
-                'title': bill_title,
-                'primary_sponsor': primary_sponsor,
-                'supporter_count': 0,
-                'opposer_count': 0
-            }
+def count_votes(dict_files):
 
-    with open('votes.csv', 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            vote_id = int(row['id'])
-            bill_id = int(row['bill_id'])
-            voted_bill[vote_id] = bill_id
+    legislators = generate_legislator_with_count(
+        dict_files['legislators'])
 
-# Calculating votes
-    with open('vote_results.csv', 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            vote_result_id = int(row['id'])
-            legislator_id = int(row['legislator_id'])
-            vote_id = int(row['vote_id'])
-            vote_type = int(row['vote_type'])
-            vote_results[vote_result_id] = {
-                'legislator_id': legislator_id,
-                'bill_id': voted_bill[vote_id],
-                'vote_type': vote_type
-            }
-            if vote_type == 1:
-                bills[voted_bill[vote_id]]['supporter_count'] = bills[voted_bill[vote_id]
-                                                                      ]['supporter_count'] + 1
-                legislators[legislator_id]['num_supported_bills'] = legislators[legislator_id]['num_supported_bills'] + 1
-            elif vote_type == 2:
-                legislators[legislator_id]['num_opposed_bills'] = legislators[legislator_id]['num_opposed_bills'] + 1
-                bills[voted_bill[vote_id]]['opposer_count'] = bills[voted_bill[vote_id]
-                                                                    ]['opposer_count'] + 1
+    bills = generate_bills_with_count(
+        legislators, dict_files['bills'])
+
+    voted_bill = map_vote_id_to_bill_id(dict_files['votes'])
+
+    for vote in dict_files['vote_results']:
+        legislator_id = int(vote['legislator_id'])
+        vote_id = int(vote['vote_id'])
+        vote_type = int(vote['vote_type'])
+
+        if vote_type == 1:
+            bills[voted_bill[vote_id]]['supporter_count'] = bills[voted_bill[vote_id]
+                                                                  ]['supporter_count'] + 1
+            legislators[legislator_id]['num_supported_bills'] = legislators[legislator_id]['num_supported_bills'] + 1
+        elif vote_type == 2:
+            legislators[legislator_id]['num_opposed_bills'] = legislators[legislator_id]['num_opposed_bills'] + 1
+            bills[voted_bill[vote_id]]['opposer_count'] = bills[voted_bill[vote_id]
+                                                                ]['opposer_count'] + 1
+
     return {'legislators': legislators, 'bills': bills}
 
 
-# Run the data processing
-process_data()
+single_dict = convert_csv_files_to_dicts_list(file_names)
 
-
+votes_result = count_votes(single_dict)
 # Generate output CSV files legislators-support-oppose-count.csv and bills.csv
